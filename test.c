@@ -1,4 +1,5 @@
 #include "string.h"
+#include "macros.h"
 #include "mem_alloc.h"
 
 /* Function that tests my String */
@@ -21,9 +22,10 @@ int main()
 
 	while(1)
 	{
-		allocate_page();
+		char* address;
+		address = allocate_page();
+		*address = '@';
 	}
-	
 
 	return 0;
 }

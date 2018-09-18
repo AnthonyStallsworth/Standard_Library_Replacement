@@ -1,18 +1,26 @@
 #include "stdio.h"
 #include "exit.h"
 #include <windows.h>
+#include <strsafe.h>
 
 
 #ifndef MEM_ALLOC
 #define MEM_ALLOC
 
 /************************************
+* Returns the last error produced   *
+* by the windows API                *
+************************************/
+DWORD get_error(LPTSTR lpszFunction)
+{
+	DWORD dw = GetLastError();
+	return dw;
+}
+
+/************************************
 * This is the helper variables that *
 * are needed for virtualAlloc       *
 ************************************/
-
-/* Address of the next page to ask for */
-LPVOID next_page;
 
 /* Count of pages allocated */
 DWORD page_count = 0;
@@ -36,22 +44,23 @@ void* allocate_page()
 	page_size = sys_info.dwPageSize;
 
 	page_base = VirtualAlloc(
-		(LPVOID) ((int) next_page * page_count),
+		NULL,
 		page_size,
 		MEM_RESERVE | MEM_COMMIT,
 		PAGE_READWRITE);
 
     if (page_base == NULL)
     {	
-		exit();
-    }
-    else
-    {
+		DWORD dw = get_error((LPTSTR) TEXT("VirtualAlloc"));
+		ExitProcess(dw);
+
+    } else {
+		
 		/* Increment the page count, and advance lpNxtPage to the next page */
     	page_count++;
 		printf("%d\n", page_count);
-    	//next_page = (LPVOID) ((PCHAR) next_page + page_size);
-    }
+		return page_base;
+	}
 
 }
 
