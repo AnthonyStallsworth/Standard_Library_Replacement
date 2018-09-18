@@ -13,16 +13,16 @@
 ************************************/
 
 /* Address of the next page to ask for */
-LPTSTR lpNxtPage;
+LPTSTR next_page;
 
 /* Count of pages allocated */
-DWORD dwPages = 0;
+DWORD page_count = 0;
 
 /* Page size on this computer */
-DWORD dwPageSize;
+DWORD page_size;
 
 // Base address of the test memory
-LPVOID lpvBase;				
+LPVOID page_base;				
 
 /************************************
 * This function allocates another   *
@@ -30,55 +30,28 @@ LPVOID lpvBase;
 ************************************/
 void* allocate_page()
 {
-	SYSTEM_INFO sSysInfo;		// useful information about the system
+	SYSTEM_INFO sys_info;		// useful information about the system
 
-	GetSystemInfo(&sSysInfo);	// Initialize the structure
+	GetSystemInfo(&sys_info);	// Initialize the structure
 
-	dwPageSize = sSysInfo.dwPageSize;
+	page_size = sys_info.dwPageSize;
 
-		lpvBase = VirtualAlloc(
-			(LPVOID)lpNxtPage,
-			dwPageSize,
-			MEM_RESERVE,
-			PAGE_READWRITE);
+	page_base = VirtualAlloc(
+		next_page,
+		page_size,
+		MEM_RESERVE | MEM_COMMIT,
+		PAGE_READWRITE);
 
-    if (lpvBase == NULL)
-    {
-    	/* Page allocation failed */
-		DWORD error = GetLastError();
-
-		/* Stuff needed for FormatMessage call */
-		LPVOID lpMsgBuf;
-		LPVOID lpDisplayBuf;
-		DWORD dw = GetLastError();
-		LPCTSTR lpszFunction = TEXT("VirtualAlloc");
-
-		error = FormatMessage(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			FORMAT_MESSAGE_FROM_SYSTEM |
-			FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,
-			dw,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,
-			0, NULL);
-		
-		lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT,
-			(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR));
-		StringCchPrintf((LPTSTR)lpDisplayBuf,
-			LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-			TEXT("%s failed with error %d: %s"),
-			lpszFunction, dw, lpMsgBuf);
-		MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK);
-		
+    if (page_base == NULL)
+    {	
 		exit();
     }
     else
     {
 		/* Increment the page count, and advance lpNxtPage to the next page */
-    	dwPages++;
-		printf("%d\n", dwPages);
-    	lpNxtPage = (LPTSTR) ((PCHAR) lpNxtPage + dwPageSize);
+    	page_count++;
+		printf("%d\n", page_count);
+    	next_page = (LPTSTR) ((PCHAR) next_page + page_size);
     }
 
 }

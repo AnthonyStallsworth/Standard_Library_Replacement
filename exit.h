@@ -3,7 +3,7 @@
 #ifndef EXIT
 #define EXIT
 
-/* Get the Current Process information and EXIT! */
+/* Exit the current process */
 void exit()
 {
 	ExitProcess(0);
