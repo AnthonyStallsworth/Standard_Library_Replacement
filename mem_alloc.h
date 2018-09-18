@@ -1,7 +1,6 @@
 #include "stdio.h"
 #include "exit.h"
 #include <windows.h>
-#include <strsafe.h>
 
 
 #ifndef MEM_ALLOC
@@ -13,7 +12,7 @@
 ************************************/
 
 /* Address of the next page to ask for */
-LPTSTR next_page;
+LPVOID next_page;
 
 /* Count of pages allocated */
 DWORD page_count = 0;
@@ -37,7 +36,7 @@ void* allocate_page()
 	page_size = sys_info.dwPageSize;
 
 	page_base = VirtualAlloc(
-		next_page,
+		(LPVOID) ((int) next_page * page_count),
 		page_size,
 		MEM_RESERVE | MEM_COMMIT,
 		PAGE_READWRITE);
@@ -51,7 +50,7 @@ void* allocate_page()
 		/* Increment the page count, and advance lpNxtPage to the next page */
     	page_count++;
 		printf("%d\n", page_count);
-    	next_page = (LPTSTR) ((PCHAR) next_page + page_size);
+    	//next_page = (LPVOID) ((PCHAR) next_page + page_size);
     }
 
 }
